@@ -9,6 +9,9 @@ run:
 ```
 ./output
 ```
+
+  <img src="./output/sample_output.PNG" height=200>
+
 ---
 **Todos:**
 - [x] Handle 4 instruction formats
