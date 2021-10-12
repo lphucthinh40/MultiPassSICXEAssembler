@@ -33,7 +33,7 @@ int MultiPassAssembler::getAddressOffset(int address, bool &usePC, bool &useBASE
     // BASE relative
     else if (address - BASE > 0 && address - BASE < 4095)
     {
-        std::cout << "use BASE: " << address << " - " << BASE << std::endl;
+        // std::cout << "use BASE: " << address << " - " << BASE << std::endl;
         usePC = false;
         useBASE = true;
         useExt = false;
@@ -41,7 +41,7 @@ int MultiPassAssembler::getAddressOffset(int address, bool &usePC, bool &useBASE
     }
     // Use Extended Format (added just for precaution, this should not happen)
     else {
-        std::cout << "use Extended: " << address << " - " << BASE << std::endl;
+        // std::cout << "use Extended: " << address << " - " << BASE << std::endl;
         usePC = false;
         useBASE = false;
         useExt = true;
