@@ -6,6 +6,7 @@ struct Instruction {
     std::string label;
     std::string opcode;
     std::string operand;
+    int objectCodeSize = 0;
     int address = -1;
     int objectCode = -1;
 

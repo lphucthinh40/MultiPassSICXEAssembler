@@ -31,19 +31,20 @@ private:
     // Base Register Value (for BASE & NOBASE directive)
     int PC = 0;
     int BASE = 0;
-    
-    // Process an instruction & generate its object code (For Pass 2)
-    ObjectCode processFormat1(Instruction &instr);
-    ObjectCode processFormat2(Instruction &instr);
-    ObjectCode processFormat34(Instruction &instr);
 
-    // Check whether address is pc-relative or base-relative, and calculate address displacement
-    int getAddressOffset(int address, bool &usePC, bool &useBASE, bool &useExt);
+    private:
+        // Process an instruction & generate its object code (For Pass 2)
+        ObjectCode processFormat1(Instruction &instr);
+        ObjectCode processFormat2(Instruction &instr);
+        ObjectCode processFormat34(Instruction &instr);
+        int processByteOperand(Instruction &inst);
+        // Check whether address is pc-relative or base-relative, and calculate address displacement
+        int getAddressOffset(int address, bool &usePC, bool &useBASE, bool &useExt);
+        // Generate object code based on instruction format (support 4 instruction formats)
+        int getObjectCode(Instruction &inst);
 
-    int getObjectCode(Instruction &inst);
-
-public:
-    MultiPassAssembler();
-    ~MultiPassAssembler();
-    void translate(string filename);
+    public:
+        MultiPassAssembler();
+        ~MultiPassAssembler();
+        void translate(string filename);
 };

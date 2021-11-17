@@ -22,16 +22,16 @@ MultiPassAssembler::~MultiPassAssembler()
 int MultiPassAssembler::getAddressOffset(int address, bool &usePC, bool &useBASE, bool &useExt)
 {   
     // PC relative
-    if (address - PC > -2048 && address - PC < 2047)
+    if (address - PC >= -2048 && address - PC <= 2047)
     {   
-        std::cout << "use PC: " << address << " - " << PC << std::endl;
+        // std::cout << "use PC: " << address << " - " << PC << std::endl;
         usePC = true;
         useBASE = false;
         useExt = false;
         return address - PC;
     }
     // BASE relative
-    else if (address - BASE > 0 && address - BASE < 4095)
+    else if (address - BASE >= 0 && address - BASE <= 4095)
     {
         // std::cout << "use BASE: " << address << " - " << BASE << std::endl;
         usePC = false;
@@ -47,6 +47,29 @@ int MultiPassAssembler::getAddressOffset(int address, bool &usePC, bool &useBASE
         useExt = true;
         return address;
     }
+}
+
+int MultiPassAssembler::processByteOperand(Instruction &inst)
+{
+    if (!inst.operand.empty()) {
+                int operand_len = inst.operand.length();
+                if (operand_len>3) { 
+                    char type = inst.operand[0];
+                    string value = inst.operand.substr(2, operand_len-3);
+                    cout << "substr: " << value << endl;
+                    if (type == 'X' && value.length() <= 8) {                       
+                            return std::stoul(value, nullptr, 16);
+                    } else if (type == 'C' && value.length() <= 4) {
+                        int len = value.length();
+                        int result = 0;
+                        for (int i = 0; i<len; i++) {
+                            result = result + (int(value[i]) << ((len-i-1)*8));
+                        }
+                        return result;
+                    }
+                }
+            }
+    return -1;
 }
 
 
@@ -137,8 +160,8 @@ ObjectCode MultiPassAssembler::processFormat34(Instruction &inst)
         if (inst.operand.substr(inst.operand.length()-2)==",X") {
             flags[Flag::X] = true;
             address_str = inst.operand.substr(0, inst.operand.length()-2); // remove ',X'
-            std::cout << "->" << inst.operand << "<-" << std::endl;
-            std::cout << "->" << address_str << "<-" << std::endl;
+            // std::cout << "->" << inst.operand << "<-" << std::endl;
+            // std::cout << "->" << address_str << "<-" << std::endl;
         } else {
             flags[Flag::X] = false;
             address_str = inst.operand;
@@ -289,6 +312,9 @@ void MultiPassAssembler::translate(string filename) {
         else if (inst->opcode == "NOBASE")
         {
             BASE = 0;
+        }
+        else if (inst->opcode == "BYTE") {
+            inst->objectCode = processByteOperand(*inst);
         }
         else if (OPTAB.find(inst->opcode) != OPTAB.end() || OPTAB.find(inst->opcode.substr(1)) != OPTAB.end())
         {   // - handle opcode that belongs to OPTAB
