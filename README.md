@@ -17,11 +17,11 @@ run:
 - [x] Handle 4 instruction formats
 - [x] Handle all addressing modes
 - [ ] Add Makefile
-- [ ] Generate object code for BYTE & WORD directive
+- [x] Generate object code for BYTE & WORD directive
 - [ ] Perform Error Detections
 - [ ] Generate Object File
-- [ ] Program Relocation
-- [ ] Literals
-- [ ] Symbol-defined Statements
-- [ ] Program Block
+- [x] Literals
+- [x] Expression
+- [x] Symbol-defined Statements
+- [x] Program Block
 - [ ] Control Section
