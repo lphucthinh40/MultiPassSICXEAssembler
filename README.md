@@ -10,7 +10,7 @@ run:
 ./output
 ```
 
-  <img src="./output/sample_output.PNG" height=200>
+  <img src="./output/sample_output.PNG" width=500>
 
 ---
 **Todos:**
