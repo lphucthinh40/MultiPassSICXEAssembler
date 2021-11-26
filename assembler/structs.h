@@ -8,6 +8,7 @@ struct Instruction {
     std::string operand;
     int objectCodeSize = 0;
     int address = -1;
+    int block_id = 0;
     int objectCode = -1;
 
     static Instruction parse(std::string str) {
@@ -105,6 +106,12 @@ std::ostream& operator << (std::ostream& out,const Instruction &instr);
 struct SymbolEntry{
     std::string label;
 	int value;
+    int blockId;
+    bool isAbsolute = false;
+    bool isEQU = false;
+    // bool isResolved = true;
+    // std::string expression = "";
+    // std::unordered_set<std::string> referenced_labels;
 };
 
 struct Error {
@@ -112,4 +119,19 @@ struct Error {
     int passNumber;
     std::string instruction;
     std::string message;
+};
+
+struct LiteralEntry{
+    std::string name;
+    int value;
+    int length;
+    int address;
+    int blockId = 0;
+};
+
+struct ProgramBlockEntry{
+    int id;
+    std::string name;
+    int address;
+    int length;
 };

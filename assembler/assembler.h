@@ -8,9 +8,16 @@ class MultiPassAssembler
 {
 private:
     // Opcode Table
-    map<string, OpcodeEntry> OPTAB;
+    unordered_map<string, OpcodeEntry> OPTAB;
     // Symbol Table
-    map<string, SymbolEntry> SYMTAB;
+    unordered_map<string, SymbolEntry> SYMTAB;
+    // Literal Table
+    unordered_map<string, LiteralEntry> LITTAB;
+    queue<string> literal_queue;
+    // Program Block Table
+    vector<ProgramBlockEntry> BLOCKTAB;
+    vector<int> LOCCTRs;
+    unordered_map<string, int> blockNameToID;
     // Registers
     map<char,int> REGISTERS = {
         {'A',0},
@@ -25,7 +32,7 @@ private:
     vector<Instruction> intermediate;
     vector<Error> errors;
     // Location Counter
-    int LOCCTR = 0;
+    int BLOCKID = 0;
     // Program Length
     int LENGTH = 0;
     // Base Register Value (for BASE & NOBASE directive)
@@ -36,12 +43,14 @@ private:
         // Process an instruction & generate its object code (For Pass 2)
         ObjectCode processFormat1(Instruction &instr);
         ObjectCode processFormat2(Instruction &instr);
-        ObjectCode processFormat34(Instruction &instr);
-        int processByteOperand(Instruction &inst);
+        ObjectCode processFormat3(Instruction &instr);
+        ObjectCode processFormat4(Instruction &instr);
+        int processByteOperand(string operand, int* byteSize);
+        int processExpression(const string expression, bool &isAbsolute, vector<string>& unresolved_labels);
         // Check whether address is pc-relative or base-relative, and calculate address displacement
         int getAddressOffset(int address, bool &usePC, bool &useBASE, bool &useExt);
         // Generate object code based on instruction format (support 4 instruction formats)
-        int getObjectCode(Instruction &inst);
+        int getObjectCode(Instruction &inst, int* byteSize);
 
     public:
         MultiPassAssembler();

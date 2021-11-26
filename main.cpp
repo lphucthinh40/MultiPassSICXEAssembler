@@ -2,5 +2,5 @@
 
 int main() {
     MultiPassAssembler assembler = MultiPassAssembler();
-    assembler.translate("test/sample_input.txt");
+    assembler.translate("test/sample_input_3.txt");
 }
