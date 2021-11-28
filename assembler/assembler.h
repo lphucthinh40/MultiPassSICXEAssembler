@@ -35,6 +35,7 @@ private:
     int BLOCKID = 0;
     // Program Length
     int LENGTH = 0;
+    string PROGNAME = "";
     // Base Register Value (for BASE & NOBASE directive)
     int PC = 0;
     int BASE = 0;

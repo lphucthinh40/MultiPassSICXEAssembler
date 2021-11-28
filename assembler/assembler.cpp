@@ -359,6 +359,10 @@ void MultiPassAssembler::translate(string filename) {
             }
             // Step 3: Process opcode field
             if (instruction.opcode == "START") {
+                // - if there is a label here, set it as program name
+                if (!instruction.label.empty()) {
+                    PROGNAME = instruction.label.substr(0,6); // max size for program name is 6 characters
+                }
                 // - update location counter
                 int address = (int)std::strtol(&instruction.operand[0], NULL, 16);
                 if (address != 0) {
@@ -465,9 +469,11 @@ void MultiPassAssembler::translate(string filename) {
         std::cout << instr;
     }
 
-     for (auto entry : LITTAB) {
-        std::cout << std::setw(10) << " |" << entry.first << "| " << std::setw(10) << std::hex << entry.second.address << std::dec << std::endl;
+    std::cout << std::endl << "------ LITERAL TABLE -----" << std::endl;
+    for (auto entry : LITTAB) {
+        std::cout << std::setw(10) << entry.first << std::setw(10) << std::hex << entry.second.address << std::dec << std::endl;
     }
+    std::cout << std::endl;
 
     // UPDATE PROGRAM BLOCK TABLE
     BLOCKTAB[0].length = LOCCTRs[0];
@@ -476,9 +482,11 @@ void MultiPassAssembler::translate(string filename) {
         BLOCKTAB[t].length = LOCCTRs[t];
     }
     LENGTH = BLOCKTAB[BLOCKTAB.size()-1].address + BLOCKTAB[BLOCKTAB.size()-1].length;
+    std::cout << std::endl << "----------- PROGRAM BLOCK TABLE ------------" << std::endl;
     for (auto block : BLOCKTAB) {
-        std::cout << std::setw(10) << block.name << std::setw(10) << block.id << std::hex << std::setw(10) << block.address << std::setw(10) << block.length << std::dec << endl;
+        std::cout << std::setw(10) << ((block.name.empty())? "DEFAULT" : block.name) << std::setw(10) << block.id << std::hex << std::setw(10) << block.address << std::setw(10) << block.length << std::dec << endl;
     }
+    std::cout << std::endl;
 
     // MIDDLE PASSES
     if (!isSymtabComplete) {
@@ -511,10 +519,6 @@ void MultiPassAssembler::translate(string filename) {
     }
 
     if (isSymtabComplete) {
-
-    for (auto entry : SYMTAB) {
-        std::cout << std::setw(10) << entry.first << " | " << std::setw(10) << entry.second.blockId << " | " << std::setw(10) << entry.second.value << std::endl;
-    }
 
     // PASS 2
     std::cout << std::endl << "***************** PASS 2 *********************" << std::endl << std::endl;
@@ -552,8 +556,56 @@ void MultiPassAssembler::translate(string filename) {
     // simply print instructions with object code
     cout<< std::setw(4) << "LOC/BLOCK" << std::setfill(' ') << std::setw(10) << "LABEL" << std::setw(10) << "OPCODE" << std::setw(20) << "OPERAND" << std::setw(10) << "OJBECT" << std::setw(5) << "SIZE" << endl << endl;
     for (auto instr : intermediate) {
+        // std::cout << instr.opcode << "--" << instr.operand << endl;
         std::cout << instr;
     }
+
+    // print object code record
+    cout << std::endl << std::endl << "GENERATED OBJECT CODE" << std::endl;
+    cout << "-----------------------------------------------------" << std::endl;
+    string objectCodeLine = "";
+    int firstStartingAddress = intermediate.front().address;
+    int startingAddress = firstStartingAddress;
+    int byteCounter = 0;
+    vector<string> modificationRecords;
+    cout << "H^" << std::left << std::setw(6) << std::setfill(' ') << PROGNAME << std::right << std::hex << "^" << std::setw(6) << std::setfill('0') << firstStartingAddress << "^" << std::setw(6) << LENGTH << std::endl;
+
+    for (auto instr : intermediate) {
+        // std::cout << instr.opcode << "--" << instr.operand << endl;
+        bool isRES = (instr.opcode == "RESW") || (instr.opcode == "RESB");
+        bool isUSE = (instr.opcode == "USE");
+        if (instr.objectCodeSize > 0 || isRES || isUSE) {
+            if (byteCounter+instr.objectCodeSize > 30 || ((isRES || isUSE) && byteCounter>0)) {
+                cout << "T^" << std::setw(6) << std::setfill('0') << std::hex << startingAddress << "^" << std::setw(2) << byteCounter << objectCodeLine << std::endl;
+                startingAddress += byteCounter; 
+                objectCodeLine = "";
+                byteCounter = 0;                
+            }
+            if (isUSE) {
+                startingAddress = BLOCKTAB[instr.block_id].address + instr.address;
+            }
+            else if (isRES) {
+                startingAddress += (instr.opcode == "RESW")? std::stoi(instr.operand) * 3 : std::stoi(instr.operand);
+            } else {
+                stringstream ss;
+                ss << std::setw(instr.objectCodeSize * 2) << std::setfill('0') << std::hex <<  instr.objectCode;
+                objectCodeLine +=  "^" + ss.str();
+                byteCounter += instr.objectCodeSize;
+            }
+            if (instr.opcode == "+JSUB") {
+                stringstream ss;
+                ss << "M^" << std::setw(6) << std::setfill('0') << std::hex << instr.address + 1 << "^05" << std::endl;
+                modificationRecords.push_back(ss.str());
+            }
+        }
+    }
+    if (byteCounter > 0) {
+        cout << "T^" << std::setw(6) << std::setfill('0') << std::hex << startingAddress << "^" << std::setw(2) << byteCounter << objectCodeLine << std::dec << std::endl;
+    }
+    for (string m : modificationRecords) {
+        cout << m;
+    }
+    cout << "E^" << std::setw(6) << std::setfill('0') << std::hex << firstStartingAddress << std::dec << std::endl;
 
     }
     else {
