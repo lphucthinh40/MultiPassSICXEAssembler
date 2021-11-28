@@ -10,7 +10,11 @@ run:
 ./output
 ```
 
-  <img src="./output/sample_output.PNG" width=500>
+**Final Pass Output**
+<img src="./output/sample_output.png" width=500>
+
+**Generated Object Program**
+<img src="./output/object_code_generator.png" width=500>
 
 ---
 **Todos:**
