@@ -10,10 +10,14 @@ run:
 ./output
 ```
 
+## Expected Result
+
 **Final Pass Output**
-<img src="./output/sample_output.png" width=500>
+
+<img src="./output/sample_output.PNG" width=500>
 
 **Generated Object Program**
+
 <img src="./output/object_code_generator.png" width=500>
 
 ---
@@ -23,9 +27,8 @@ run:
 - [ ] Add Makefile
 - [x] Generate object code for BYTE & WORD directive
 - [ ] Perform Error Detections
-- [ ] Generate Object File
+- [x] Generate Object Program
 - [x] Literals
 - [x] Expression
 - [x] Symbol-defined Statements
 - [x] Program Block
-- [ ] Control Section
